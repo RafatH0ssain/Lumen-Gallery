@@ -1,12 +1,19 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { feedReducer, initialFeedState, FOCUS_BATCH } from "./feedReducer.js";
-import { fetchExplorePage, fetchGenreBatch, genreOf } from "../lib/aic.js";
+import {
+  fetchExplorePage,
+  fetchGenreBatch,
+  genreOf,
+  resolveBootPage,
+} from "../lib/aic.js";
 
 const PREFETCH_THRESHOLD = 8; // keep at least this many unseen cards queued
 
 export function useFeed() {
   const [state, dispatch] = useReducer(feedReducer, initialFeedState);
-  const visitedPages = useRef(new Set());
+  // index.html fires the first explore request before the bundle arrives
+  // (LCP); adopt its visited-pages set and consume its promise once here.
+  const visitedPages = useRef(window.__lumenBoot?.visitedPages ?? new Set());
   const loading = useRef(false);
   const focusSeq = useRef(0); // invalidates in-flight genre fetches
 
@@ -14,7 +21,11 @@ export function useFeed() {
     if (loading.current) return;
     loading.current = true;
     try {
-      const arts = await fetchExplorePage(visitedPages.current);
+      const boot = window.__lumenBoot;
+      window.__lumenBoot = null;
+      const arts =
+        (boot ? await resolveBootPage(boot) : null) ??
+        (await fetchExplorePage(visitedPages.current));
       dispatch({ type: "EXPLORE_APPEND", arts });
     } catch {
       dispatch({

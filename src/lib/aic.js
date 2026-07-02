@@ -41,6 +41,19 @@ export function imageUrl(imageId, width = 843) {
 }
 
 /**
+ * The exact IIIF width the feed should request: the rendered slot is
+ * min(100vw - 40px, 632px), density capped at 1.5x per the note above,
+ * rounded up to 50px buckets so the IIIF cache stays warm across similar
+ * viewports, and never above AIC's recommended 843.
+ * KEEP IN SYNC with the boot-time preload in index.html.
+ */
+export function feedImageWidth() {
+  const slot = Math.min((window.innerWidth || 672) - 40, 632);
+  const density = Math.min(window.devicePixelRatio || 1, 1.5);
+  return Math.min(843, Math.ceil((slot * density) / 50) * 50);
+}
+
+/**
  * The agreed genre hierarchy: Style > Subject > Classification.
  * Extraction (what genre does *this* artwork belong to) walks the same order.
  */
@@ -74,6 +87,23 @@ async function search(body, signal) {
   if (!res.ok) throw new Error(`AIC search failed: ${res.status}`);
   const json = await res.json();
   return normalize(json.data ?? []);
+}
+
+/**
+ * Consume the boot-time explore fetch fired inline in index.html (which
+ * duplicates the explore query — keep the two in sync). Returns normalized
+ * arts, or null so the caller falls back to a regular fetch.
+ */
+export async function resolveBootPage(boot) {
+  try {
+    const res = await boot.firstPage;
+    if (!res?.ok) return null;
+    const json = await res.json();
+    const arts = normalize(json.data ?? []);
+    return arts.length ? arts : null;
+  } catch {
+    return null;
+  }
 }
 
 /**

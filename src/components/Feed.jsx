@@ -31,8 +31,11 @@ export default function Feed() {
         </div>
       )}
 
-      <div className="flex flex-col gap-16 py-8">
-        {state.items.map((item) =>
+      {/* min-height keeps the footer below the fold before the first page of
+          artworks lands — otherwise it paints high and the arriving cards
+          shove it down (a massive layout shift on slow connections). */}
+      <div className="flex flex-col gap-16 py-8 min-h-[150vh]">
+        {state.items.map((item, i) =>
           item.kind === "skeleton" ? (
             <SkeletonCard key={item.key} />
           ) : (
@@ -42,6 +45,7 @@ export default function Feed() {
               focusGenre={item.focusGenre}
               onFocusRequest={focusGenre}
               onScrolledPast={markSeen}
+              eager={i === 0}
             />
           ),
         )}

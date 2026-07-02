@@ -14,12 +14,88 @@
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Fonts load async so text renders immediately in fallback faces;
+         display=swap upgrades in place. Removes ~1.3s of render blocking. -->
     <link
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..600&family=Archivo:wght@400;500;600&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
-    <link rel="preconnect" href="https://api.artic.edu" />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..600&family=Archivo:wght@400;500;600&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+    <!-- crossorigin: the search fetch is a CORS request and can only reuse
+         a preconnected socket opened in CORS mode. Images are no-cors, so
+         the www host preconnect stays credentialless. -->
+    <link rel="preconnect" href="https://api.artic.edu" crossorigin />
     <link rel="preconnect" href="https://www.artic.edu" />
+    <script>
+      // LCP: the first artwork can't paint until the first explore request
+      // returns, so fire it here — in flight while the app bundle is still
+      // downloading. Consumed once by useFeed via resolveBootPage().
+      // KEEP IN SYNC with fetchExplorePage()/FIELDS/MAX_RANDOM_PAGE in
+      // src/lib/aic.js: same query, same fields, page in [1, 83].
+      (function () {
+        var page = 1 + Math.floor(Math.random() * 83);
+        // Once the page data arrives, preload the first artwork's image with
+        // the exact srcset/sizes ArtCard will render, so the LCP image is
+        // downloading while React is still booting. KEEP IN SYNC with the
+        // <img> in src/components/ArtCard.jsx and imageUrl() in src/lib/aic.js.
+        function preloadFirstImage(res) {
+          res
+            .clone()
+            .json()
+            .then(function (j) {
+              var first = (j.data || []).filter(function (a) {
+                return a.image_id;
+              })[0];
+              if (!first) return;
+              // Same width formula as feedImageWidth() in src/lib/aic.js.
+              var slot = Math.min((window.innerWidth || 672) - 40, 632);
+              var density = Math.min(window.devicePixelRatio || 1, 1.5);
+              var w = Math.min(843, Math.ceil((slot * density) / 50) * 50);
+              var l = document.createElement("link");
+              l.rel = "preload";
+              l.as = "image";
+              l.fetchPriority = "high";
+              l.href =
+                "https://www.artic.edu/iiif/2/" +
+                first.image_id +
+                "/full/" +
+                w +
+                ",/0/default.jpg";
+              document.head.appendChild(l);
+            })
+            .catch(function () {});
+          return res;
+        }
+        window.__lumenBoot = {
+          visitedPages: new Set([page]),
+          firstPage: fetch("https://api.artic.edu/api/v1/artworks/search", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              query: {
+                bool: {
+                  must: [
+                    { term: { is_public_domain: true } },
+                    { exists: { field: "image_id" } },
+                  ],
+                },
+              },
+              fields:
+                "id,title,artist_display,date_display,medium_display,image_id,style_title,subject_titles,classification_titles,thumbnail",
+              page: page,
+              limit: 12,
+            }),
+          }).then(preloadFirstImage),
+        };
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

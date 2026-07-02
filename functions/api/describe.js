@@ -39,9 +39,17 @@ export async function onRequestGet(context) {
 
   // 3. The id must be a real artwork — fetch its metadata (which we also
   //    need for the prompt), rejecting anything AIC doesn't recognize.
+  // AIC sits behind CloudFront, which 403s requests without a User-Agent.
+  // Browsers set their own; workerd does not, so this fetch must.
   const artRes = await fetch(
     `https://api.artic.edu/api/v1/artworks/${id}` +
       `?fields=title,artist_display,date_display,medium_display,style_title,subject_titles,classification_titles`,
+    {
+      headers: {
+        "user-agent": "lumen-gallery/2.0 (Cloudflare Pages Function)",
+        "AIC-User-Agent": "lumen-gallery/2.0 (Cloudflare Pages Function)",
+      },
+    },
   );
   if (!artRes.ok) {
     return json({ error: "Artwork not found." }, 404);

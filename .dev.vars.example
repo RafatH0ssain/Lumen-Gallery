@@ -1,0 +1,17 @@
+# Copy to `.dev.vars` for local development with `wrangler pages dev`.
+# `.dev.vars` is gitignored. In production, set these as encrypted secrets:
+#   npx wrangler pages secret put OPENAI_API_KEY
+
+# Required — the only paid dependency in the stack. Set a monthly budget
+# cap in the OpenAI dashboard as the final backstop.
+OPENAI_API_KEY=sk-REPLACE_ME
+
+# Optional — email delivery for the contact form (free tier: resend.com).
+# If unset, notes are stored in Workers KV under `contact:*` instead.
+RESEND_API_KEY=
+CONTACT_TO_EMAIL=
+
+# Optional — invisible CAPTCHA on the contact form (free: Cloudflare Turnstile).
+# Once set, the form requires a valid token. Add the matching site key to the
+# frontend before enabling.
+TURNSTILE_SECRET_KEY=

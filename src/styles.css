@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Lumen Gallery design tokens — "the museum after hours"
+   A dim gallery corridor: warm near-black walls, picture-light ivory text,
+   gilded-frame brass as the single accent, oxblood for rare emphasis.
+--------------------------------------------------------------------------- */
+@theme {
+  --color-ink: #16130f; /* gallery wall after hours */
+  --color-ink-soft: #201c16; /* placard shadow zones, cards */
+  --color-ivory: #efe8da; /* picture-light warm white */
+  --color-ivory-dim: #b5ac9b; /* secondary text */
+  --color-brass: #c2a45c; /* gilded frame accent */
+  --color-oxblood: #8a3a35; /* rare emphasis, the heart */
+
+  --font-display: "Fraunces", "Georgia", serif;
+  --font-body: "Archivo", system-ui, sans-serif;
+}
+
+html {
+  background: var(--color-ink);
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-ivory);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Double-tap must never trigger browser zoom on the artwork cards. */
+.art-card {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Scroll performance: offscreen cards skip layout/paint entirely. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 720px;
+}
+
+/* Museum wall-label placard — the signature element. */
+.placard {
+  background: linear-gradient(180deg, #f4eee1, #e9e1cf);
+  color: #241f18;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.35) inset,
+    0 10px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* Streaming caret for the docent note. */
+.caret::after {
+  content: "";
+  display: inline-block;
+  width: 0.55em;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--color-brass);
+  animation: caret-blink 1s steps(2, start) infinite;
+}
+@keyframes caret-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+/* Focus visibility for keyboard users, in brass. */
+:focus-visible {
+  outline: 2px solid var(--color-brass);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

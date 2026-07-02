@@ -22,8 +22,14 @@ export const FIELDS = [
 
 export const PAGE_SIZE = 12;
 
-// ES search deep-paging is capped at 10,000 records; stay safely below it.
-const MAX_RANDOM_PAGE = Math.floor(9000 / PAGE_SIZE);
+// Verified against the live API (2026-07): /artworks/search rejects any
+// request where page * limit > 1,000 with a 403 "Invalid number of results"
+// (page 83 × limit 12 = 996 is the last page that succeeds). The corpus is
+// ~59k public-domain works but only the first 1,000 are reachable per query,
+// so the explore pool is those 1,000 in relevance order, sampled by random
+// page. function_score/random_score is accepted but silently ignored, so
+// there is no server-side shuffle available.
+const MAX_RANDOM_PAGE = Math.floor(1000 / PAGE_SIZE);
 
 /**
  * IIIF lets us request the exact pixel width we render at — the single

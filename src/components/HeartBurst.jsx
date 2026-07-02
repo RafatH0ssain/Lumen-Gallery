@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 export default function HeartBurst({ at, onDone }) {
   const reduced = useReducedMotion();

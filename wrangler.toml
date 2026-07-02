@@ -6,4 +6,4 @@ compatibility_date = "2026-06-01"
 #   npx wrangler kv namespace create LUMEN_KV
 [[kv_namespaces]]
 binding = "LUMEN_KV"
-id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+id = "e5f109255422499f914e947ab43acb3e"

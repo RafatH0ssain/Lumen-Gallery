@@ -50,7 +50,7 @@ export default function DocentNote({ artId }) {
       </button>
 
       {open && (
-        <div className="mt-2 text-sm leading-relaxed text-black/80">
+        <div className="mt-2 text-sm leading-relaxed text-black/80 max-h-[22dvh] overflow-y-auto overscroll-contain pr-1">
           {status === "error" ? (
             <p>
               The docent stepped away.{" "}

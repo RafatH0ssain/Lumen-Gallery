@@ -1,22 +1,15 @@
 @import "tailwindcss";
 
 /* ---------------------------------------------------------------------------
-   Lumen Gallery design tokens — "the museum after hours"
-   A dim gallery corridor: warm near-black walls, picture-light ivory text,
-   gilded-frame brass as the single accent, oxblood for rare emphasis.
+   Lumen Gallery design tokens — "modern-art core" (Bauhaus / De Stijl)
+   A black canvas hung with primary colour. Hard geometry, heavy grotesk caps,
+   solid offset shadows like a screen-printed exhibition poster. Red, blue and
+   yellow are the whole accent language; paper-white is the wall label.
 --------------------------------------------------------------------------- */
 
-/* Metric-matched local fallbacks: the webfonts load async (see index.html),
-   and these keep the fallback text at identical layout metrics so the swap
-   causes no layout shift. Values measured in Chrome against the real fonts. */
-@font-face {
-  font-family: "Fraunces Fallback";
-  src: local("Georgia");
-  size-adjust: 93.11%;
-  ascent-override: 95.59%;
-  descent-override: 23.63%;
-  line-gap-override: 0%;
-}
+/* Metric-matched local fallback: Archivo loads async (see index.html); this
+   keeps fallback text at Archivo's layout metrics so the font swap causes no
+   layout shift. Values measured in Chrome against the real face. */
 @font-face {
   font-family: "Archivo Fallback";
   src: local("Arial");
@@ -27,14 +20,17 @@
 }
 
 @theme {
-  --color-ink: #16130f; /* gallery wall after hours */
-  --color-ink-soft: #201c16; /* placard shadow zones, cards */
-  --color-ivory: #efe8da; /* picture-light warm white */
-  --color-ivory-dim: #b5ac9b; /* secondary text */
-  --color-brass: #c2a45c; /* gilded frame accent */
-  --color-oxblood: #8a3a35; /* rare emphasis, the heart */
+  --color-ink: #0e0e0d; /* black gallery canvas */
+  --color-ink-soft: #191917; /* raised black — frames, cards */
+  --color-paper: #f3efe3; /* wall-label paper / light text */
+  --color-paper-dim: #a29d90; /* secondary text on black */
+  --color-red: #d8231f; /* De Stijl primary */
+  --color-blue: #1c3fc4; /* primary blue */
+  --color-yellow: #f2c014; /* primary yellow */
 
-  --font-display: "Fraunces", "Fraunces Fallback", "Georgia", serif;
+  /* One geometric grotesk carries the whole system: body at 400–600,
+     display at 800 in tight uppercase. */
+  --font-display: "Archivo", "Archivo Fallback", system-ui, sans-serif;
   --font-body: "Archivo", "Archivo Fallback", system-ui, sans-serif;
 }
 
@@ -47,7 +43,7 @@ html {
 
 body {
   font-family: var(--font-body);
-  color: var(--color-ivory);
+  color: var(--color-paper);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -69,10 +65,10 @@ body {
    artwork's size can be computed before a single pixel arrives. */
 .art-zone {
   position: absolute;
-  top: 60px;
+  top: 64px;
   left: 0;
   right: 0;
-  bottom: 232px;
+  bottom: 236px;
 }
 .placard-zone {
   position: absolute;
@@ -83,33 +79,35 @@ body {
 
 /* The artwork: --ar (width/height) is set inline per work. The frame takes
    the largest box with that aspect that fits the stage — computed from CSS
-   alone, so the gilded frame hugs the art even before the image loads and
-   the LQIP paints inside it as a background until the real pixels land. */
+   alone, so the frame hugs the art even before the image loads and the LQIP
+   paints inside it as a background until the real pixels land.
+   A paper mat + hard black keyline + solid offset shadow = the print look. */
 .art-frame {
   --ar: 0.8;
   height: min(100%, calc((100vw - 40px) / var(--ar)));
-  border: 6px solid var(--color-ink-soft);
+  border: 8px solid var(--color-paper);
   background-color: var(--color-ink-soft);
   background-size: cover;
   background-position: center;
   box-shadow:
-    0 0 0 1px rgba(194, 164, 92, 0.25),
-    0 24px 60px rgba(0, 0, 0, 0.6);
+    0 0 0 2px var(--color-ink),
+    14px 14px 0 rgba(0, 0, 0, 0.55);
   cursor: zoom-in;
   overflow: hidden;
   color: transparent; /* no alt-text flash while pixels stream in */
 }
 
 /* Ambient wash: the artwork's own LQIP, blurred wall-wide behind it —
-   picture-light spill, unique to every card. */
+   picture-light spill, unique to every card. Dimmer here so the black
+   canvas stays graphic rather than photographic. */
 .ambient {
-  filter: blur(48px) saturate(1.15);
-  transform: scale(1.3);
+  filter: blur(60px) saturate(1.25);
+  transform: scale(1.35);
   opacity: 0;
   transition: opacity 900ms ease;
 }
 .art-card[data-active="true"] .ambient {
-  opacity: 0.32;
+  opacity: 0.22;
 }
 
 /* Placard + frame ease in as a card becomes the active one. */
@@ -128,13 +126,20 @@ body {
   transform: translateY(0) scale(1);
 }
 
-/* Museum wall-label placard — the signature element. */
+/* Museum wall-label placard — reimagined as a De Stijl block: flat paper,
+   a hard black keyline, a thick colour edge, and a solid offset shadow. */
 .placard {
-  background: linear-gradient(180deg, #f4eee1, #e9e1cf);
-  color: #241f18;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.35) inset,
-    0 10px 24px rgba(0, 0, 0, 0.45);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border: 2px solid var(--color-ink);
+  border-left: 8px solid var(--color-blue);
+  box-shadow: 8px 8px 0 var(--color-red);
+}
+
+/* Docent note lives inside the placard, set off by a hard black rule so the
+   whole label reads as one printed object. */
+.docent-note {
+  border-top: 2px solid var(--color-ink);
 }
 
 /* First-card scroll invitation. */
@@ -153,7 +158,7 @@ body {
   animation: hint-drift 2.2s ease-in-out infinite;
 }
 
-/* Genre banner drops in from the top. */
+/* Genre banner drops in from the top — a black bar with a yellow keyline. */
 @keyframes banner-in {
   from {
     transform: translate(-50%, -16px);
@@ -183,6 +188,27 @@ body {
   animation: lightbox-in 260ms ease-out both;
 }
 
+/* The zoomable stage: the browser must not steal the pinch/pan gesture. */
+.lightbox-frame {
+  touch-action: none;
+  overscroll-behavior: contain;
+  border: 8px solid var(--color-paper);
+  box-shadow:
+    0 0 0 2px var(--color-ink),
+    18px 18px 0 rgba(0, 0, 0, 0.6);
+}
+.lightbox-img {
+  transform-origin: center center;
+  transition: transform 0s;
+  will-change: transform;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.lightbox-img.zooming {
+  transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 /* Contact sheet slides in from the right. */
 @keyframes sheet-in {
   from {
@@ -196,15 +222,15 @@ body {
   animation: sheet-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Streaming caret for the docent note. */
+/* Streaming caret for the docent note — a solid red block. */
 .caret::after {
   content: "";
   display: inline-block;
-  width: 0.55em;
+  width: 0.5em;
   height: 1em;
   margin-left: 2px;
   vertical-align: text-bottom;
-  background: var(--color-brass);
+  background: var(--color-red);
   animation: caret-blink 1s steps(2, start) infinite;
 }
 @keyframes caret-blink {
@@ -213,11 +239,11 @@ body {
   }
 }
 
-/* Focus visibility for keyboard users, in brass. */
+/* Focus visibility for keyboard users — a hard blue block outline. */
 :focus-visible {
-  outline: 2px solid var(--color-brass);
-  outline-offset: 3px;
-  border-radius: 2px;
+  outline: 3px solid var(--color-blue);
+  outline-offset: 2px;
+  border-radius: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -229,5 +255,8 @@ body {
   }
   html {
     scroll-behavior: auto;
+  }
+  .lightbox-img.zooming {
+    transition: none;
   }
 }

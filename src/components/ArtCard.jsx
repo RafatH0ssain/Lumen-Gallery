@@ -149,37 +149,37 @@ function ArtCard({
         )}
       </div>
 
-      {/* The wall label — museum didactic placard, offset like the real thing. */}
+      {/* The wall label — a De Stijl block: paper, hard keyline, colour edge. */}
       <div className="placard-zone placard-wrap w-full max-w-2xl mx-auto px-5 pb-8">
         {focusGenre && (
-          <p className="text-[11px] tracking-[0.25em] uppercase text-brass mb-2 pl-1">
+          <p className="mb-2 pl-1 inline-block bg-red text-paper text-[10px] font-bold tracking-[0.22em] uppercase px-2 py-1">
             More · {focusGenre}
           </p>
         )}
         <div className="placard ml-auto mr-0 relative w-[92%] max-w-md px-5 py-4">
-          <p className="absolute top-2.5 right-4 text-[10px] tracking-[0.3em] uppercase text-black/60">
-            № {number}
+          <p className="absolute -top-3 -right-3 h-8 w-8 flex items-center justify-center bg-yellow text-ink text-[11px] font-extrabold tracking-tight border-2 border-ink">
+            {number}
           </p>
-          <h2 className="font-display text-lg sm:text-xl leading-snug pr-10">
+          <h2 className="font-display font-extrabold uppercase tracking-tight text-lg sm:text-xl leading-[1.05] pr-6">
             {art.title}
           </h2>
-          <p className="text-sm mt-1 whitespace-pre-line opacity-80">
+          <p className="text-xs font-semibold uppercase tracking-wide mt-2 whitespace-pre-line opacity-80">
             {art.artist_display}
           </p>
-          <p className="text-xs mt-1 opacity-60">
+          <p className="text-[11px] font-medium uppercase tracking-wide mt-1 opacity-55">
             {art.date_display}
             {art.medium_display ? ` · ${art.medium_display}` : ""}
           </p>
 
-          <div className="flex items-center gap-4 mt-3 pt-3 border-t border-black/10">
+          <div className="flex items-center gap-4 mt-3 pt-3 docent-note">
             <DocentNote artId={art.id} />
             {genre && (
               <button
                 onClick={() => onFocusRequest(art)}
-                className="text-xs font-medium tracking-wide uppercase text-oxblood hover:opacity-70 shrink-0"
+                className="text-[11px] font-bold tracking-[0.12em] uppercase text-red hover:bg-red hover:text-paper px-1 -mx-1 shrink-0 transition-colors"
                 aria-label={`More like this, from ${genre}`}
               >
-                More like this
+                More like this →
               </button>
             )}
           </div>

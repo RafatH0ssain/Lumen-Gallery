@@ -41,7 +41,7 @@ export default function Feed() {
         <div
           role="status"
           key={state.focus.genre}
-          className="genre-banner fixed top-14 sm:top-3 left-1/2 z-20 w-max max-w-[85vw] truncate rounded-full bg-ink-soft/90 backdrop-blur px-4 py-1.5 text-xs tracking-widest uppercase text-brass border border-brass/30"
+          className="genre-banner fixed top-14 sm:top-3 left-1/2 z-20 w-max max-w-[85vw] truncate bg-ink border-2 border-yellow px-4 py-1.5 text-xs font-bold tracking-[0.18em] uppercase text-yellow"
         >
           Now hanging · {state.focus.genre}
         </div>
@@ -70,7 +70,7 @@ export default function Feed() {
       {hintVisible && state.items.length > 0 && (
         <div
           aria-hidden="true"
-          className="scroll-hint pointer-events-none fixed bottom-1.5 left-1/2 -translate-x-1/2 z-10 text-brass"
+          className="scroll-hint pointer-events-none fixed bottom-1.5 left-1/2 -translate-x-1/2 z-10 text-yellow"
         >
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
@@ -79,9 +79,9 @@ export default function Feed() {
       )}
 
       {state.error && (
-        <p className="text-center text-oxblood py-8" role="alert">
+        <p className="text-center text-red font-semibold uppercase tracking-wide py-8" role="alert">
           {state.error}{" "}
-          <button onClick={loadMore} className="underline text-ivory">
+          <button onClick={loadMore} className="underline text-paper">
             Retry
           </button>
         </p>

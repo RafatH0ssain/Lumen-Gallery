@@ -157,9 +157,10 @@ function ArtCard({
           </p>
         )}
         <div className="placard ml-auto mr-0 relative w-[92%] max-w-md px-5 py-4">
-          <p className="absolute -top-3 -right-3 h-8 w-8 flex items-center justify-center bg-yellow text-ink text-[11px] font-extrabold tracking-tight border-2 border-ink">
-            {number}
-          </p>
+          <span
+            aria-hidden="true"
+            className="absolute -top-3 -right-3 h-8 w-8 bg-yellow border-2 border-ink"
+          />
           <h2 className="font-display font-extrabold uppercase tracking-tight text-lg sm:text-xl leading-[1.05] pr-6">
             {art.title}
           </h2>

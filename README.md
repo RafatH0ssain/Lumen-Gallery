@@ -1,12 +1,14 @@
-# Lumen — the museum after hours
+# Lumen — the museum in primary colour
 
 **Live: https://lumen-gallery.pages.dev**
 
-An endless corridor through the Art Institute of Chicago's open collection.
-One artwork per screen, each casting its own ambient light onto the gallery
-wall. **Tap** a work to view it full-size. **Double-tap** a work you love and
-the gallery hangs the next few pieces from the same genre; scroll past them
-without tapping and it drifts back to serendipity. Every piece comes with an
+An endless corridor through the Art Institute of Chicago's open collection,
+hung against a black wall in the primary red/blue/yellow of a De Stijl poster.
+One artwork per screen, each framed like a print with a hard offset shadow.
+**Tap** a work to open it full-screen — then **pinch, double-tap or scroll**
+to zoom in on the brushwork. **Double-tap** a work you love and the gallery
+hangs the next few pieces from the same genre; scroll past them without
+tapping and it drifts back to serendipity. Every piece comes with an
 AI-written docent note, streamed token-by-token and generated at most once
 ever.
 
@@ -39,10 +41,17 @@ as the build log.
   query (Style > Subject > Classification, expressed as Elasticsearch boosts
   in `src/lib/aic.js`), and reverts to explore once the batch scrolls past
   untapped
-- **Lightbox** — single tap (or `Enter`) opens the work at AIC's maximum
-  IIIF resolution
+- **Zoomable lightbox** — single tap (or `Enter`) opens the work at AIC's
+  maximum IIIF resolution; a self-contained gesture engine
+  (`src/hooks/usePinchZoom.js`) drives pinch, drag-to-pan, double-tap and
+  scroll-wheel zoom off raw pointer events, so the picture stays pinned under
+  your fingers instead of drifting off a scroll-snap page
 - **Docent notes** — one Pages Function proxies OpenAI as a text stream;
-  KV write-through means each artwork is described exactly once, ever
+  KV write-through means each artwork is described exactly once, ever. The
+  note unfolds inside the wall label itself, set off by a hard rule
+- **De Stijl wall labels** — each placard is a printed block: paper stock, a
+  black keyline, a thick colour edge, a solid offset shadow and a stamped
+  catalogue number
 - **Ambient light** — each artwork's LQIP, blurred wall-wide behind it
 - **Performance** — Lighthouse a11y 100 / CLS 0: the first search request is
   fired from an inline `<head>` script before the bundle arrives, the LCP

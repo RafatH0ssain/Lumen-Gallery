@@ -44,17 +44,26 @@ export default function DocentNote({ artId }) {
       <button
         onClick={toggle}
         aria-expanded={open}
-        className="text-xs font-medium tracking-wide uppercase text-black/60 hover:text-black"
+        className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[0.12em] uppercase text-ink hover:text-blue transition-colors"
       >
-        {open ? "Hide docent note" : "Docent note"}
+        <span
+          aria-hidden="true"
+          className={`h-2.5 w-2.5 border-2 border-ink transition-colors ${
+            open ? "bg-blue" : "bg-transparent"
+          }`}
+        />
+        {open ? "Hide note" : "Docent note"}
       </button>
 
       {open && (
-        <div className="mt-2 text-sm leading-relaxed text-black/80 max-h-[22dvh] overflow-y-auto overscroll-contain pr-1">
+        <div className="mt-2 border-l-4 border-blue pl-3 text-sm leading-relaxed text-ink/85 max-h-[22dvh] overflow-y-auto overscroll-contain">
           {status === "error" ? (
             <p>
               The docent stepped away.{" "}
-              <button onClick={fetchNote} className="underline">
+              <button
+                onClick={fetchNote}
+                className="font-bold uppercase tracking-wide text-red underline"
+              >
                 Ask again
               </button>
             </p>

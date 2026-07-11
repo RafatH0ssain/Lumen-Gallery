@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 const inputCls =
-  "w-full bg-ink-soft border border-ivory-dim/20 px-4 py-3 text-ivory placeholder:text-ivory-dim/60 focus:border-brass focus:outline-none";
+  "w-full bg-ink border-2 border-paper/25 px-4 py-3 text-paper placeholder:text-paper-dim/60 focus:border-blue focus:outline-none transition-colors";
 
 export default function ContactForm() {
   const [fields, setFields] = useState({ name: "", email: "", message: "" });
@@ -40,7 +40,7 @@ export default function ContactForm() {
 
   if (status === "sent") {
     return (
-      <p className="placard px-5 py-4 w-fit" role="status">
+      <p className="placard px-5 py-4 w-fit font-bold uppercase tracking-wide text-sm" role="status">
         Note received. Thank you for visiting.
       </p>
     );
@@ -48,7 +48,7 @@ export default function ContactForm() {
 
   return (
     <div className="flex flex-col gap-4 max-w-md">
-      <label className="text-xs uppercase tracking-widest text-ivory-dim">
+      <label className="text-[11px] font-bold uppercase tracking-[0.16em] text-paper-dim">
         Name
         <input
           className={`${inputCls} mt-1`}
@@ -58,7 +58,7 @@ export default function ContactForm() {
           autoComplete="name"
         />
       </label>
-      <label className="text-xs uppercase tracking-widest text-ivory-dim">
+      <label className="text-[11px] font-bold uppercase tracking-[0.16em] text-paper-dim">
         Email (optional)
         <input
           type="email"
@@ -69,7 +69,7 @@ export default function ContactForm() {
           autoComplete="email"
         />
       </label>
-      <label className="text-xs uppercase tracking-widest text-ivory-dim">
+      <label className="text-[11px] font-bold uppercase tracking-[0.16em] text-paper-dim">
         Message
         <textarea
           className={`${inputCls} mt-1 min-h-32 resize-y`}
@@ -80,7 +80,7 @@ export default function ContactForm() {
       </label>
 
       {status === "error" && (
-        <p className="text-oxblood text-sm" role="alert">
+        <p className="text-red text-sm font-semibold" role="alert">
           {errorMsg}
         </p>
       )}
@@ -88,7 +88,7 @@ export default function ContactForm() {
       <button
         onClick={submit}
         disabled={status === "sending"}
-        className="w-fit bg-brass text-ink px-6 py-3 text-sm font-semibold tracking-wide uppercase hover:opacity-90 disabled:opacity-50"
+        className="w-fit bg-red text-paper border-2 border-red px-6 py-3 text-sm font-bold tracking-[0.12em] uppercase hover:bg-ink hover:text-paper disabled:opacity-50 transition-colors"
       >
         {status === "sending" ? "Sending…" : "Leave note"}
       </button>

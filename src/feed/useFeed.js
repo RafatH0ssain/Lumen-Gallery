@@ -5,7 +5,7 @@ import {
   fetchGenreBatch,
   genreOf,
   resolveBootPage,
-} from "../lib/aic.js";
+} from "../lib/cma.js";
 
 const PREFETCH_THRESHOLD = 8; // keep at least this many unseen cards queued
 
@@ -70,7 +70,10 @@ export function useFeed() {
       try {
         const exclude = new Set(stateRef.current.seenIds);
         exclude.add(art.id);
-        const arts = await fetchGenreBatch(genre, exclude, FOCUS_BATCH);
+        // Takes the artwork, not just the genre string: CMA needs to know
+        // which tier the genre came from to filter on the right field, and
+        // to widen through the remaining tiers if that one runs thin.
+        const arts = await fetchGenreBatch(art, exclude, FOCUS_BATCH);
         if (focusSeq.current !== seq) return; // superseded by a newer tap
         dispatch({ type: "FOCUS_FILL", arts, placeholderKeys });
       } catch {

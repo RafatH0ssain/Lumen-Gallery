@@ -2,7 +2,7 @@
 
 **Live: https://lumen-gallery.pages.dev**
 
-An endless corridor through the Art Institute of Chicago's open collection,
+An endless corridor through the Cleveland Museum of Art's open collection,
 hung against a black wall in the primary red/blue/yellow of a De Stijl poster.
 One artwork per screen, each framed like a print with a hard offset shadow.
 **Tap** a work to open it full-screen — then **pinch, double-tap or scroll**
@@ -21,15 +21,33 @@ rate limits, and a hard budget cap.
 ## How it's built
 
 This project was built by pairing with [Claude Code](https://claude.com/claude-code)
-under a written spec: [`CLAUDE.md`](CLAUDE.md) defines the product semantics
-(the genre hierarchy, the engagement-loop state machine, hard rules like
-"never commit secrets" and "keep the dependency surface minimal"), and the
-agent executed against it — verifying every assumption against the live APIs
-rather than trusting the code as written. That process caught real bugs the
-code review couldn't: AIC's search API caps pagination at 1,000 records (not
-the assumed 10,000), and its CDN silently 403s any server-side fetch without
-a `User-Agent`. Each commit is co-authored accordingly; the git history reads
-as the build log.
+under a written spec that defined the product semantics up front — the genre
+hierarchy, the engagement-loop state machine, and hard rules like "never
+commit secrets" and "keep the dependency surface minimal" — with every
+assumption verified against the live APIs rather than trusted as written.
+That process caught real bugs the
+code review couldn't: the Art Institute of Chicago's search API caps
+pagination at 1,000 records (not the assumed 10,000), and its CDN silently
+403s any server-side fetch without a `User-Agent`. The git history reads as
+the build log.
+
+### The AIC migration
+
+The gallery originally ran on the Art Institute of Chicago's API. On
+2025-12-05 their IIIF image host began returning `403` with
+`cf-mitigated: challenge` and `cross-origin-resource-policy: same-origin` to
+every programmatic request — a Cloudflare JS challenge that an `<img>`
+subresource can never solve, plus a CORP header forbidding cross-origin
+embedding even on success. Their *metadata* host stayed open, so the site
+kept rendering placards and blurred backdrops with a broken-image icon where
+every artwork should have been.
+
+It was verified blocked from residential, cellular, datacenter and
+Cloudflare-edge vantage points, which ruled out a server-side image proxy.
+Upstream: [data-aggregator#151](https://github.com/art-institute-of-chicago/data-aggregator/issues/151)
+(closed, still unfixed). The feed moved to the Cleveland Museum of Art's Open
+Access API — CC0, keyless, and with no pagination cap, so the explore pool
+went from AIC's reachable 1,000 works to Cleveland's full 41,511.
 
 ## Features
 
@@ -38,11 +56,11 @@ as the build log.
 - **The engagement loop** — a pure client-side state machine
   (`src/feed/feedReducer.js`): double-tap splices an optimistic skeleton
   batch after the tapped card, backfills it from a hierarchy-weighted genre
-  query (Style > Subject > Classification, expressed as Elasticsearch boosts
-  in `src/lib/aic.js`), and reverts to explore once the batch scrolls past
+  query (Culture > Technique > Type, an ordered cascade in
+  `src/lib/cma.js`), and reverts to explore once the batch scrolls past
   untapped
-- **Zoomable lightbox** — single tap (or `Enter`) opens the work at AIC's
-  maximum IIIF resolution; a self-contained gesture engine
+- **Zoomable lightbox** — single tap (or `Enter`) opens the work at the
+  largest rendition Cleveland publishes; a self-contained gesture engine
   (`src/hooks/usePinchZoom.js`) drives pinch, drag-to-pan, double-tap and
   scroll-wheel zoom off raw pointer events, so the picture stays pinned under
   your fingers instead of drifting off a scroll-snap page
@@ -52,19 +70,19 @@ as the build log.
 - **De Stijl wall labels** — each placard is a printed block: paper stock, a
   black keyline, a thick colour edge, a solid offset shadow and a stamped
   catalogue number
-- **Ambient light** — each artwork's LQIP, blurred wall-wide behind it
+- **Ambient light** — each artwork blurred wall-wide behind itself
 - **Performance** — Lighthouse a11y 100 / CLS 0: the first search request is
   fired from an inline `<head>` script before the bundle arrives, the LCP
-  image is preloaded from its response, images ship at a 1.5× density cap,
-  and the animation layer is transform/opacity only
+  image is preloaded from its response, every frame reserves its aspect ratio
+  before paint, and the animation layer is transform/opacity only
 
 ## Setup
 
 ```bash
 npm install
 cp .dev.vars.example .dev.vars     # then paste your OpenAI key
-npx wrangler kv namespace create LUMEN_KV
-# paste the returned id into wrangler.toml
+# wrangler.toml already pins a LUMEN_KV id; forking? create your own:
+#   npx wrangler kv namespace create LUMEN_KV   → paste the id into wrangler.toml
 ```
 
 ## Local development
@@ -93,7 +111,7 @@ Or run the production build under Wrangler end-to-end: `npm run cf:preview`
 
 Smoke-test after deploy:
 
-- `GET /api/describe?id=27992` twice — second response must carry
+- `GET /api/describe?id=143165` twice — second response must carry
   `x-lumen-cache: hit`
 - `GET /api/describe?id=abc` → 400; eleven rapid misses from one IP → 429
 - Submit the contact form → `npx wrangler kv key list --binding LUMEN_KV
@@ -101,15 +119,15 @@ Smoke-test after deploy:
 
 ## Architecture notes
 
-- **AIC's API is called directly from the browser** (free and keyless); only
+- **CMA's API is called directly from the browser** (free and keyless); only
   OpenAI traffic goes through a function, so the key never ships to the
-  client — and the endpoint validates every id against AIC's catalog before
+  client — and the endpoint validates every id against CMA's catalog before
   generating, so it can't be repurposed as a general LLM proxy.
 - **Abuse economics over abuse prevention:** KV-backed per-IP rate limits
   and the once-ever description cache make abuse unprofitable; the OpenAI
   budget cap makes it bounded.
-- **Field-verified quirks** (documented in code comments): AIC search 403s
-  past 1,000 records (`page × limit`), IIIF caps at 843px width, and
+- **Field-verified quirks** (documented in code comments): CMA has no IIIF
+  service, so the fixed `web` rendition is the only usable size, and
   server-side fetches need an explicit `User-Agent` to clear its CDN.
 
 ## Free-tier budget reality check
@@ -117,11 +135,11 @@ Smoke-test after deploy:
 | Piece | Provider | Cost |
 | --- | --- | --- |
 | Hosting + functions + KV | Cloudflare Pages free tier | $0 |
-| Artwork data & images | AIC public API | $0 |
+| Artwork data & images | CMA Open Access API | $0 |
 | Contact delivery | Resend free tier / KV fallback | $0 |
 | AI descriptions | OpenAI gpt-4o-mini | ~$0.0001/artwork, once ever |
 
 ---
 
-Artwork and metadata courtesy of the [Art Institute of Chicago public API](https://api.artic.edu/docs/).
+Artwork and metadata courtesy of the [Cleveland Museum of Art Open Access API](https://openaccess-api.clevelandart.org/), released under CC0.
 Docent notes are AI-generated and may contain inaccuracies.

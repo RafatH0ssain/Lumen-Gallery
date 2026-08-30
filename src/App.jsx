@@ -45,9 +45,10 @@ function ContactSheet({ open, onClose }) {
         </p>
         <ContactForm />
         <p className="text-[11px] text-paper-dim mt-12 leading-relaxed uppercase tracking-wide">
-          An endless corridor through the Art Institute of Chicago's open
-          collection. Artwork and metadata courtesy of the AIC public API.
-          Docent notes are AI-generated and may contain inaccuracies.
+          An endless corridor through the Cleveland Museum of Art's open
+          collection. Artwork and metadata courtesy of the CMA Open Access
+          API, released under CC0. Docent notes are AI-generated and may
+          contain inaccuracies.
         </p>
       </div>
     </div>
@@ -71,7 +72,7 @@ export default function App() {
             </span>
           </h1>
           <p className="text-[10px] font-semibold tracking-[0.28em] uppercase text-paper-dim mt-1.5">
-            Art Institute of Chicago
+            Cleveland Museum of Art
           </p>
         </div>
         <button

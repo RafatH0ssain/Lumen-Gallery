@@ -1,13 +1,14 @@
 import { json, isRateLimited } from "../_utils.js";
 
 /**
- * GET /api/describe?id=<aic-artwork-id>
+ * GET /api/describe?id=<cma-artwork-id>
  *
  * Defense-in-depth for a keyless, no-auth endpoint:
  *   1. Cache-first: descriptions are deterministic per artwork, generated at
  *      most once ever. Cache hits cost nothing and return instantly.
- *   2. Input is a numeric AIC id, validated to exist in AIC's catalog before
- *      any OpenAI call — this endpoint cannot be used as a general LLM proxy.
+ *   2. Input is a numeric CMA id, validated to exist in Cleveland's catalog
+ *      before any OpenAI call — this endpoint cannot be used as a general
+ *      LLM proxy.
  *   3. Per-IP rate limit on cache misses only.
  *   4. Hard max_tokens cap here + monthly budget cap in the OpenAI dashboard.
  */
@@ -20,7 +21,12 @@ export async function onRequestGet(context) {
   }
 
   // 1. Cache first — the hot path for everything after first generation.
-  const cacheKey = `desc:${id}`;
+  // Namespaced by source: this KV may still hold `desc:<id>` entries written
+  // by the AIC build, and both catalogs use bare integers over overlapping
+  // ranges. Without the prefix a CMA work could inherit the note generated
+  // for an unrelated AIC work of the same id — permanently, since the cache
+  // is write-once. Stale `desc:*` keys are now simply unreachable.
+  const cacheKey = `desc:cma:${id}`;
   const cached = await env.LUMEN_KV.get(cacheKey);
   if (cached) {
     return new Response(cached, {
@@ -38,16 +44,16 @@ export async function onRequestGet(context) {
   }
 
   // 3. The id must be a real artwork — fetch its metadata (which we also
-  //    need for the prompt), rejecting anything AIC doesn't recognize.
-  // AIC sits behind CloudFront, which 403s requests without a User-Agent.
-  // Browsers set their own; workerd does not, so this fetch must.
+  //    need for the prompt), rejecting anything CMA doesn't recognize.
+  //    Their API 404s unknown ids, which is exactly the check we want.
+  //    workerd sends no User-Agent by default; set one so we identify
+  //    ourselves politely to their origin.
   const artRes = await fetch(
-    `https://api.artic.edu/api/v1/artworks/${id}` +
-      `?fields=title,artist_display,date_display,medium_display,style_title,subject_titles,classification_titles`,
+    `https://openaccess-api.clevelandart.org/api/artworks/${id}` +
+      `?fields=title,creators,creation_date,technique,type,culture`,
     {
       headers: {
         "user-agent": "lumen-gallery/2.0 (Cloudflare Pages Function)",
-        "AIC-User-Agent": "lumen-gallery/2.0 (Cloudflare Pages Function)",
       },
     },
   );
@@ -55,15 +61,16 @@ export async function onRequestGet(context) {
     return json({ error: "Artwork not found." }, 404);
   }
   const { data: art } = await artRes.json();
+  const culture = Array.isArray(art.culture) ? art.culture[0] : art.culture;
 
   const prompt = [
     `Write a museum docent note (110-150 words) for this artwork:`,
     `Title: ${art.title}`,
-    `Artist: ${art.artist_display ?? "Unknown"}`,
-    `Date: ${art.date_display ?? "Unknown"}`,
-    `Medium: ${art.medium_display ?? "Unknown"}`,
-    `Style: ${art.style_title ?? "Unspecified"}`,
-    `Subjects: ${(art.subject_titles ?? []).join(", ") || "Unspecified"}`,
+    `Artist: ${art.creators?.[0]?.description ?? "Unknown"}`,
+    `Date: ${art.creation_date ?? "Unknown"}`,
+    `Medium: ${art.technique ?? "Unknown"}`,
+    `Culture: ${culture ?? "Unspecified"}`,
+    `Classification: ${art.type ?? "Unspecified"}`,
     ``,
     `Tone: warm, knowledgeable, conversational — a docent speaking to a`,
     `curious visitor, not an encyclopedia. Focus on what to notice and why`,

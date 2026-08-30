@@ -1,10 +1,7 @@
 import { lazy, memo, Suspense, useEffect, useRef, useState } from "react";
-import { imageUrl, genreOf, feedImageWidth } from "../lib/aic.js";
+import { imageUrl, genreOf } from "../lib/cma.js";
 import { useDoubleTap } from "../hooks/useDoubleTap.js";
 import DocentNote from "./DocentNote.jsx";
-
-// Computed once: the one IIIF rendition this viewport needs (1.5x density cap).
-const FEED_IMAGE_WIDTH = feedImageWidth();
 
 // HeartBurst carries the motion library (~35KB gz) — the only use of it, and
 // not needed until the first double-tap. Split it out of the critical bundle
@@ -98,7 +95,6 @@ function ArtCard({
     style: {
       "--ar": art.aspect,
       aspectRatio: art.aspect,
-      backgroundImage: art.lqip ? `url(${art.lqip})` : undefined,
     },
     onPointerUp,
     onKeyDown: (e) => {
@@ -114,10 +110,13 @@ function ArtCard({
 
   return (
     <article ref={cardRef} className="art-card relative" data-active={active}>
-      {/* Ambient picture-light spill from the artwork itself. */}
-      {art.lqip && (
+      {/* Ambient picture-light spill from the artwork itself. CMA has no LQIP
+          placeholder, so this reuses the same URL as the framed image — it is
+          blurred 60px at 0.22 opacity, so resolution is irrelevant, and the
+          browser serves it from cache rather than fetching twice. */}
+      {showImage && (
         <img
-          src={art.lqip}
+          src={imageUrl(art)}
           alt=""
           aria-hidden="true"
           className="ambient absolute inset-0 h-full w-full object-cover"
@@ -132,7 +131,7 @@ function ArtCard({
         {showImage ? (
           <img
             {...frameProps}
-            src={imageUrl(art.image_id, FEED_IMAGE_WIDTH)}
+            src={imageUrl(art)}
             alt={art.title}
             loading={eager ? "eager" : "lazy"}
             fetchpriority={eager ? "high" : undefined}

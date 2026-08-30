@@ -1,11 +1,14 @@
 import { useEffect, useRef } from "react";
-import { imageUrl } from "../lib/aic.js";
+import { imageUrl } from "../lib/cma.js";
 import { usePinchZoom } from "../hooks/usePinchZoom.js";
 
 /**
- * Single-tap fullscreen view. Reuses AIC's largest rendition (843px — their
- * IIIF hard cap, verified live); on desktop that file is usually already in
- * the browser cache from the feed, so opening is instant.
+ * Single-tap fullscreen view. CMA has no IIIF service and so no larger
+ * on-demand rendition — this reuses the same `web` file the feed already
+ * showed, which means it is always warm in the browser cache and opens
+ * instantly, but it will not gain detail when zoomed the way AIC's 843px
+ * crop did. The `print` rendition exists but averages ~5MB, far too heavy
+ * to pull on a tap.
  *
  * Pinch, drag, double-tap or scroll-wheel to zoom (usePinchZoom). The frame
  * owns the gesture via `touch-action: none`, so the picture no longer drifts
@@ -40,9 +43,9 @@ export default function Lightbox({ art, onClose }) {
     >
       {/* black canvas + a faint wash of the artwork's own colour */}
       <div className="absolute inset-0 bg-ink" />
-      {art.lqip && (
+      {art.image && (
         <img
-          src={art.lqip}
+          src={imageUrl(art)}
           alt=""
           aria-hidden="true"
           className="absolute inset-0 h-full w-full object-cover blur-3xl scale-125 opacity-20"
@@ -58,7 +61,7 @@ export default function Lightbox({ art, onClose }) {
       >
         <img
           ref={imgRef}
-          src={imageUrl(art.image_id, 843)}
+          src={imageUrl(art)}
           alt={art.title}
           draggable={false}
           className="lightbox-img block max-h-[calc(82vh-16px)] max-w-full object-contain"

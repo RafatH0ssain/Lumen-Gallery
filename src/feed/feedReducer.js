@@ -2,7 +2,7 @@
  * The engagement-loop state machine.
  *
  * Two modes:
- *   EXPLORE  — queue fed by random AIC pages.
+ *   EXPLORE  — queue fed by random CMA pages.
  *   FOCUSED  — a batch of 3–5 same-genre works spliced directly after the
  *              double-tapped card. If the user scrolls past the whole batch
  *              without double-tapping any of them, we REVERT to EXPLORE.

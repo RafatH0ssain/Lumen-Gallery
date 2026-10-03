@@ -43,12 +43,40 @@
       // LCP: the first artwork can't paint until the first explore request
       // returns, so fire it here — in flight while the app bundle is still
       // downloading. Consumed once by useFeed via resolveBootPage().
-      // KEEP IN SYNC with fetchExplorePage()/FIELDS/corpusTotal in
-      // src/lib/cma.js: same query, same fields, same page range.
+      // KEEP IN SYNC with CLASSIC_TYPES/pickType()/fetchExplorePage()/FIELDS
+      // in src/lib/cma.js: same query, same fields, same weighted type draw.
+      // Written in ES5 because it runs before any bundle — nothing here may
+      // assume a transpiler has seen it.
       (function () {
-        // CMA has no deep-pagination cap, so any page in the corpus is fair
-        // game. 3459 = floor(41511 / 12); see corpusTotal in src/lib/cma.js.
-        var page = Math.floor(Math.random() * 3459);
+        // CMA has no deep-pagination cap, so any page of any one fine-art type
+        // is fair game. But the API takes exactly ONE `type` per request, and
+        // the weights are hand-set rather than proportional to the totals, or
+        // Print would hang the whole wall. Same table as CLASSIC_TYPES in
+        // src/lib/cma.js.
+        var CLASSIC_TYPES = [
+          { type: "Painting", weight: 30, total: 3955 },
+          { type: "Print", weight: 20, total: 10825 },
+          { type: "Drawing", weight: 15, total: 1995 },
+          { type: "Sculpture", weight: 15, total: 1979 },
+          { type: "Photograph", weight: 10, total: 989 },
+          { type: "Portrait Miniature", weight: 5, total: 164 },
+          { type: "Tapestry", weight: 3, total: 58 },
+        ];
+        var sum = 0;
+        var i;
+        for (i = 0; i < CLASSIC_TYPES.length; i++) {
+          sum += CLASSIC_TYPES[i].weight;
+        }
+        var r = Math.random() * sum;
+        var entry = CLASSIC_TYPES[0];
+        for (i = 0; i < CLASSIC_TYPES.length; i++) {
+          r -= CLASSIC_TYPES[i].weight;
+          if (r < 0) {
+            entry = CLASSIC_TYPES[i];
+            break;
+          }
+        }
+        var page = Math.floor(Math.random() * Math.max(1, Math.floor(entry.total / 12)));
         // Once the page data arrives, preload the first artwork's image so the
         // LCP image is downloading while React is still booting. KEEP IN SYNC
         // with the <img> in src/components/ArtCard.jsx and imageUrl() in
@@ -75,11 +103,15 @@
           return res;
         }
         window.__lumenBoot = {
-          visitedPages: new Set([page]),
+          // Keyed by type and page, matching fetchExplorePage(), so the page
+          // this request already paid for is not drawn again a moment later.
+          visitedPages: new Set([entry.type + ":" + page]),
           firstPage: fetch(
             "https://openaccess-api.clevelandart.org/api/artworks/" +
               "?has_image=1&cc0=1" +
               "&fields=id,title,creators,creation_date,technique,type,culture,images" +
+              "&type=" +
+              encodeURIComponent(entry.type) +
               "&skip=" +
               page * 12 +
               "&limit=12",

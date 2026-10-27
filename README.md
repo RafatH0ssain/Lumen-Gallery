@@ -4,7 +4,7 @@ An endless gallery, in the primary colours of a De Stijl poster.
 
 **Live: https://lumen.rafathossain.com**
 
-![A dark full-screen gallery view of a Daubigny etching with a De Stijl wall label](Lumen-img.png)
+![A dark full-screen gallery view of a Daubigny etching with a De Stijl wall label](Lumen-img.webp)
 
 An endless scroll through the Cleveland Museum of Art's open collection, one artwork per screen. The feed is restricted to fine art (painting, sculpture, drawing, print, photograph, portrait miniature and tapestry), leaving out the ceramics, armour, furniture and jewellery the museum also catalogues. Tap a work to open it full-screen, then pinch, double-tap or scroll to zoom. Double-tap a work you like and the gallery hangs more from the same genre; scroll past them untapped and it drifts back to random. Every work comes with an AI-written docent note.
 

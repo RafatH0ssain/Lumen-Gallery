@@ -34,7 +34,7 @@ npm run dev             # app on :5173
 ## Deploy
 
 - Cloudflare Pages: build `npm run build`, output `dist`, or `npm run cf:deploy`
-- Bind the `LUMEN_KV` namespace
+- Bind the `LUMEN_KV` namespace (`npx wrangler kv namespace create LUMEN_KV`) and paste the id into `wrangler.toml` where the placeholder is
 - `npx wrangler pages secret put OPENAI_API_KEY`
 - Set a monthly budget cap in the OpenAI dashboard
 

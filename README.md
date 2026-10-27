@@ -6,7 +6,7 @@ An endless gallery, in the primary colours of a De Stijl poster.
 
 ![A dark full-screen gallery view of a Daubigny etching with a De Stijl wall label](Lumen-img.png)
 
-An endless scroll through the Cleveland Museum of Art's open collection, one artwork per screen. The feed is restricted to fine art — painting, sculpture, drawing, print, photograph, portrait miniature and tapestry — leaving out the ceramics, armour, furniture and jewellery the museum also catalogues. Tap a work to open it full-screen, then pinch, double-tap or scroll to zoom. Double-tap a work you like and the gallery hangs more from the same genre; scroll past them untapped and it drifts back to random. Every work comes with an AI-written docent note.
+An endless scroll through the Cleveland Museum of Art's open collection, one artwork per screen. The feed is restricted to fine art (painting, sculpture, drawing, print, photograph, portrait miniature and tapestry), leaving out the ceramics, armour, furniture and jewellery the museum also catalogues. Tap a work to open it full-screen, then pinch, double-tap or scroll to zoom. Double-tap a work you like and the gallery hangs more from the same genre; scroll past them untapped and it drifts back to random. Every work comes with an AI-written docent note.
 
 ## Stack
 
@@ -24,7 +24,7 @@ cp .dev.vars.example .dev.vars   # add your OpenAI key
 
 ## Run
 
-Two terminals — Wrangler serves the functions, Vite serves the app:
+Two terminals. Wrangler serves the functions, Vite serves the app:
 
 ```bash
 npm run dev:functions   # functions on :8788
@@ -33,7 +33,7 @@ npm run dev             # app on :5173
 
 ## Deploy
 
-- Cloudflare Pages: build `npm run build`, output `dist` — or `npm run cf:deploy`
+- Cloudflare Pages: build `npm run build`, output `dist`, or `npm run cf:deploy`
 - Bind the `LUMEN_KV` namespace
 - `npx wrangler pages secret put OPENAI_API_KEY`
 - Set a monthly budget cap in the OpenAI dashboard

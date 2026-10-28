@@ -1,2 +1,13 @@
+# Security headers for every page. The two script hashes are the inline LCP prefetch and the font
+# link's onload handler in index.html:
+# editing either changes its hash, and the browser blocks it until the hash here is updated
+# (the browser console prints the new hash).
 /*
   Access-Control-Allow-Origin: https://lumen.rafathossain.com
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-jWtSbiwy9JsrkfoVPno1i0jZH30twj2N6Dw42EnF3lU=' 'unsafe-hashes' 'sha256-MhtPZXr7+LpJUY5qtMutB+qWfQtMaPccfe7QXtCcEYc='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://openaccess-cdn.clevelandart.org; connect-src 'self' https://openaccess-api.clevelandart.org; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests

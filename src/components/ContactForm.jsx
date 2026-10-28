@@ -1,4 +1,23 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+// Cloudflare Turnstile (bot check). The site key is public; the secret lives in the Pages project.
+const TURNSTILE_SITE_KEY = "0x4AAAAAAFp7yttF2cEi3OQ7";
+const TURNSTILE_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+
+function loadTurnstile() {
+  if (window.turnstile) return Promise.resolve(window.turnstile);
+  return new Promise((resolve, reject) => {
+    let script = document.querySelector(`script[src="${TURNSTILE_SRC}"]`);
+    if (!script) {
+      script = document.createElement("script");
+      script.src = TURNSTILE_SRC;
+      script.async = true;
+      document.head.appendChild(script);
+    }
+    script.addEventListener("load", () => resolve(window.turnstile));
+    script.addEventListener("error", reject);
+  });
+}
 
 const inputCls =
   "w-full bg-ink border-2 border-paper/25 px-4 py-3 text-paper placeholder:text-paper-dim/60 focus:border-blue focus:outline-none transition-colors";
@@ -7,6 +26,29 @@ export default function ContactForm() {
   const [fields, setFields] = useState({ name: "", email: "", message: "" });
   const [status, setStatus] = useState("idle"); // idle | sending | sent | error
   const [errorMsg, setErrorMsg] = useState("");
+  const [token, setToken] = useState("");
+  const box = useRef(null);
+  const widget = useRef(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadTurnstile()
+      .then((ts) => {
+        if (cancelled || !box.current) return;
+        widget.current = ts.render(box.current, {
+          sitekey: TURNSTILE_SITE_KEY,
+          theme: "dark",
+          callback: setToken,
+          "expired-callback": () => setToken(""),
+          "error-callback": () => setToken(""),
+        });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      if (widget.current != null) window.turnstile?.remove(widget.current);
+    };
+  }, []);
 
   function set(key) {
     return (e) => setFields((f) => ({ ...f, [key]: e.target.value }));
@@ -18,15 +60,23 @@ export default function ContactForm() {
       setStatus("error");
       return;
     }
+    if (!token) {
+      setErrorMsg("Please wait for the verification check to finish.");
+      setStatus("error");
+      return;
+    }
     setStatus("sending");
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(fields),
+        body: JSON.stringify({ ...fields, turnstileToken: token }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
+        // A token is single-use: get a fresh one for the retry.
+        setToken("");
+        if (widget.current != null) window.turnstile?.reset(widget.current);
         setErrorMsg(data.error ?? "The note couldn't be delivered. Try again.");
         setStatus("error");
         return;
@@ -78,6 +128,8 @@ export default function ContactForm() {
           maxLength={2000}
         />
       </label>
+
+      <div ref={box} />
 
       {status === "error" && (
         <p className="text-red text-sm font-semibold" role="alert">

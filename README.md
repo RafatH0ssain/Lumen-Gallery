@@ -34,7 +34,7 @@ npm run dev             # app on :5173
 ## Deploy
 
 - Cloudflare Pages: build `npm run build`, output `dist`, or `npm run cf:deploy`
-- Bind the `LUMEN_KV` namespace in the Pages project (Settings → Functions → KV namespace bindings); `wrangler.toml` deliberately does not duplicate the id
+- `LUMEN_KV` is declared in `wrangler.toml`, so every deploy keeps the binding. For your own copy, create a namespace (`npx wrangler kv namespace create LUMEN_KV`) and put its id there
 - `npx wrangler pages secret put OPENAI_API_KEY`
 - Set a monthly budget cap in the OpenAI dashboard
 
